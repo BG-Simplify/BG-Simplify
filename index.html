@@ -2,24 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BG Simplify Prototype</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>BG Simplify App</title>
   
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Tailwind Config for Animations -->
+  <!-- Tailwind Config -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+            'premium-hover': '0 10px 30px -4px rgba(79, 70, 229, 0.15)',
+            'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+          },
           animation: {
-            'fade-in-up': 'fadeInUp 0.5s ease-out'
+            'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'slide-down': 'slideDown 0.3s ease-out forwards'
           },
           keyframes: {
             fadeInUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '0%': { opacity: '0', transform: 'translateY(24px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            slideDown: {
+              '0%': { opacity: '0', transform: 'translateY(-20px) translateX(-50%)' },
+              '100%': { opacity: '1', transform: 'translateY(0) translateX(-50%)' },
             }
           }
         }
@@ -31,7 +52,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Hide scrollbar for cleaner prototype look */
+    /* Hide scrollbar for cleaner native app look */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -39,462 +60,610 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    /* Prevent double-tap to zoom on interactive elements */
+    button, input, select, .upload-box {
+      touch-action: manipulation;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-slate-800 flex items-center justify-center p-4 font-sans selection:bg-blue-200">
+<body class="bg-slate-100 font-sans text-slate-900 antialiased selection:bg-indigo-200 flex justify-center h-[100dvh] overflow-hidden">
 
-  <!-- Device Frame -->
-  <div class="w-[375px] h-[812px] bg-black rounded-[3rem] p-3 shadow-2xl relative">
-    <!-- Notch simulation -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-3xl z-50"></div>
+  <!-- Main App Container - Full height portrait mode on desktop -->
+  <div class="w-full h-full max-w-[480px] bg-[#f8fafc] relative overflow-hidden flex flex-col shadow-2xl sm:border-x border-slate-200">
     
-    <!-- Screen Area -->
-    <div class="w-full h-full bg-white rounded-[2.25rem] overflow-hidden relative shadow-inner">
+    <!-- Toast Notification -->
+    <div id="toast" class="absolute top-8 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-full shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[100] transform -translate-y-4 text-sm font-semibold whitespace-nowrap flex items-center gap-3 border border-slate-700">
+      <i data-lucide="info" class="w-5 h-5 text-indigo-400"></i>
+      <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- ================= SCREENS ================= -->
+
+    <!-- 1. Splash Screen -->
+    <div id="screen-splash" class="app-screen h-full w-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-900 flex-col items-center justify-center text-white relative overflow-hidden z-50">
+      <!-- Premium glowing orbs background -->
+      <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
       
-      <!-- ================= SCREENS ================= -->
-
-      <!-- 1. Splash Screen -->
-      <div id="screen-splash" class="app-screen h-full w-full bg-gradient-to-b from-blue-400 via-blue-600 to-blue-800 flex-col items-center justify-center text-white relative overflow-hidden cursor-pointer" onclick="navigate('login')">
-        <!-- Decorative background shapes -->
-        <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
-          <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full border-[20px] border-white/30"></div>
-          <div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full border-[30px] border-white/20"></div>
-        </div>
-        
-        <div class="flex flex-col items-center z-10 animate-fade-in-up">
-          <div class="bg-transparent border-4 border-white p-6 rounded-full mb-6 relative">
-            <i data-lucide="shield" class="w-16 h-16 text-white relative z-10" stroke-width="1.5"></i>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40px] h-[40px] flex flex-col justify-center gap-1.5 z-0">
-              <div class="h-[2px] w-full bg-white"></div>
-              <div class="h-[2px] w-full bg-white"></div>
-              <div class="h-[2px] w-full bg-white"></div>
-            </div>
+      <div class="flex flex-col items-center z-10 animate-fade-in-up mt-[-10vh]">
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl mb-8 relative shadow-glass">
+          <i data-lucide="shield" class="w-20 h-20 text-white relative z-10" stroke-width="1.5"></i>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50px] h-[50px] flex flex-col justify-center gap-2 z-0">
+            <div class="h-[3px] w-full bg-white/80 rounded-full"></div>
+            <div class="h-[3px] w-full bg-white/80 rounded-full"></div>
+            <div class="h-[3px] w-full bg-white/80 rounded-full"></div>
           </div>
-          <h1 class="text-4xl font-bold mb-2 tracking-tight">BG Simplify</h1>
-          <p class="text-sm font-medium opacity-90 tracking-wide">Fast • Transparent</p>
-          <p class="text-sm font-medium opacity-90 tracking-wide">Digital Bank Guarantees</p>
         </div>
+        <h1 class="text-4xl font-extrabold mb-3 tracking-tight">BG Simplify</h1>
+        <p class="text-base font-medium text-indigo-100 tracking-wide">Fast • Transparent</p>
+        <p class="text-base font-medium text-indigo-100 tracking-wide">Digital Bank Guarantees</p>
       </div>
 
-      <!-- 2. Login Screen -->
-      <div id="screen-login" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <div class="bg-gradient-to-b from-blue-500 to-blue-700 pt-20 pb-16 px-6 rounded-b-[3rem] shadow-lg text-center relative overflow-hidden">
-          <!-- Decorative subtle curve -->
-          <div class="absolute bottom-0 left-0 w-full h-12 bg-white/10 rounded-t-full scale-150 translate-y-6 blur-sm"></div>
-          <h2 class="text-3xl font-bold text-white relative z-10">Welcome Back</h2>
-        </div>
-        
-        <div class="flex-1 px-6 pt-10 pb-6 flex flex-col">
-          <div class="space-y-4">
-            <input type="text" placeholder="Email / Mobile Number" class="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" />
-            <input type="password" placeholder="Password" class="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" />
-          </div>
-          
-          <button onclick="navigate('dashboard')" class="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl mt-8 shadow-md hover:bg-blue-700 transition-colors active:scale-[0.98]">
-            Login
-          </button>
-          
-          <div class="mt-auto text-center">
-            <p class="text-sm text-gray-500">
-              New to BG Simplify? <a href="#" class="text-blue-600 font-semibold">Create Account</a>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Dashboard Screen -->
-      <div id="screen-dashboard" class="app-screen h-full w-full bg-gray-100 flex-col" style="display: none;">
-        <div class="bg-blue-600 pt-12 pb-20 px-6 rounded-b-[2rem] text-center relative">
-          <div class="absolute top-12 left-4">
-            <i data-lucide="menu" class="text-white w-6 h-6"></i>
-          </div>
-          <h2 class="text-xl font-semibold text-white">Dashboard</h2>
-        </div>
-        
-        <div class="flex-1 px-5 -mt-12 flex flex-col">
-          <!-- Banner -->
-          <div class="bg-white rounded-xl shadow-md p-3 mb-6 flex justify-between items-center cursor-pointer border border-blue-50" onclick="navigate('apply_form')">
-            <span class="text-blue-600 font-medium pl-2">Get Bank Guarantee in Minutes</span>
-            <div class="bg-blue-50 p-1.5 rounded-full">
-              <i data-lucide="chevron-right" class="text-blue-600 w-5 h-5"></i>
-            </div>
-          </div>
-          
-          <!-- Grid -->
-          <div class="grid grid-cols-2 gap-4">
-            <div onclick="navigate('apply_form')" class="bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center gap-3 active:scale-[0.98] transition-transform cursor-pointer">
-              <div class="bg-blue-50 p-3 rounded-full text-blue-600">
-                <i data-lucide="file-text" class="w-7 h-7" stroke-width="2"></i>
-              </div>
-              <span class="text-sm font-medium text-gray-700 whitespace-pre-line leading-tight">Apply for<br>Bank Guarantee</span>
-            </div>
-
-            <div onclick="navigate('status')" class="bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center gap-3 active:scale-[0.98] transition-transform cursor-pointer">
-              <div class="bg-blue-50 p-3 rounded-full text-blue-600">
-                <i data-lucide="clipboard-list" class="w-7 h-7" stroke-width="2"></i>
-              </div>
-              <span class="text-sm font-medium text-gray-700 whitespace-pre-line leading-tight">Track<br>Application</span>
-            </div>
-
-            <div class="bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center gap-3 active:scale-[0.98] transition-transform cursor-pointer">
-              <div class="bg-blue-50 p-3 rounded-full text-blue-600">
-                <i data-lucide="book-open" class="w-7 h-7" stroke-width="2"></i>
-              </div>
-              <span class="text-sm font-medium text-gray-700 whitespace-pre-line leading-tight">Learn<br>About BG</span>
-            </div>
-
-            <div onclick="navigate('help')" class="bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center gap-3 active:scale-[0.98] transition-transform cursor-pointer">
-              <div class="bg-blue-50 p-3 rounded-full text-blue-600">
-                <i data-lucide="message-circle" class="w-7 h-7" stroke-width="2"></i>
-              </div>
-              <span class="text-sm font-medium text-gray-700 whitespace-pre-line leading-tight">Support<br>&nbsp;</span>
-            </div>
-          </div>
-          
-          <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
-            <div class="h-2 rounded-full transition-all duration-300 w-4 bg-blue-500"></div>
-            <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-            <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-            <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. Apply Form Screen -->
-      <div id="screen-apply_form" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between shadow-md z-10 relative">
-          <button onclick="navigate('dashboard')" class="p-1 hover:bg-white/20 rounded-full transition-colors">
-            <i data-lucide="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <h1 class="font-semibold text-lg">Apply for Bank Guarantee</h1>
-          <div class="w-8"></div>
-        </div>
-        
-        <div class="p-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
-          <div class="space-y-5">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Select Type</label>
-              <div class="flex p-1 bg-gray-200 rounded-lg">
-                <button class="flex-1 bg-white py-2 rounded-md shadow-sm text-sm font-medium text-gray-800">Performance BG</button>
-                <button class="flex-1 py-2 text-sm font-medium text-gray-500">Financial BG</button>
-              </div>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Enter Amount</label>
-              <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-                <input type="number" class="w-full pl-8 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00" />
-              </div>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-              <select class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
-                <option>Select Duration</option>
-                <option>6 Months</option>
-                <option>1 Year</option>
-                <option>3 Years</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Purpose</label>
-              <input type="text" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-          </div>
-          
-          <div class="mt-auto pt-6">
-            <button onclick="navigate('upload')" class="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
-              Next <i data-lucide="arrow-left" class="w-4 h-4 rotate-180"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. Upload Docs Screen -->
-      <div id="screen-upload" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between shadow-md z-10 relative">
-          <button onclick="navigate('apply_form')" class="p-1 hover:bg-white/20 rounded-full transition-colors">
-            <i data-lucide="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <h1 class="font-semibold text-lg">Upload Documents</h1>
-          <div class="w-8"></div>
-        </div>
-        
-        <div class="p-6 flex-1 flex flex-col">
-          <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-50">
-              <i data-lucide="camera" class="w-8 h-8 text-blue-600"></i>
-            </div>
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-100">
-              <i data-lucide="folder" class="w-8 h-8 text-blue-600"></i>
-            </div>
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-50">
-              <i data-lucide="image" class="w-8 h-8 text-blue-600"></i>
-            </div>
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-600">
-              <i data-lucide="file-badge" class="w-8 h-8 text-white"></i>
-            </div>
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-50">
-              <i data-lucide="files" class="w-8 h-8 text-blue-600"></i>
-            </div>
-            <div class="aspect-video rounded-xl flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-transparent hover:border-blue-200 shadow-sm bg-blue-600">
-              <i data-lucide="folder" class="w-8 h-8 text-white"></i>
-            </div>
-          </div>
-          
-          <p class="text-center text-sm text-gray-500 font-medium mb-8">Simple & minimal documentation required</p>
-          
-          <div class="mt-auto">
-            <button onclick="navigate('pricing')" class="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors">
-              Submit Documents
-            </button>
-            <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-4 bg-blue-500"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. Pricing Screen -->
-      <div id="screen-pricing" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between shadow-md z-10 relative">
-          <button onclick="navigate('upload')" class="p-1 hover:bg-white/20 rounded-full transition-colors">
-            <i data-lucide="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <h1 class="font-semibold text-lg">Transparent Pricing</h1>
-          <div class="w-8"></div>
-        </div>
-        
-        <div class="p-6 flex-1 flex flex-col">
-          <div class="space-y-4 mt-4">
-            <div class="bg-white p-5 rounded-xl flex justify-between items-center shadow-sm border border-gray-100">
-              <span class="text-gray-600 font-medium">Processing Fee</span>
-              <span class="text-xl font-bold text-gray-800">₹0</span>
-            </div>
-            <div class="bg-white p-5 rounded-xl flex justify-between items-center shadow-sm border border-gray-100">
-              <span class="text-gray-600 font-medium">Annual Charge</span>
-              <span class="text-xl font-bold text-blue-600">1%</span>
-            </div>
-            <div class="bg-white p-5 rounded-xl flex justify-between items-center shadow-sm border border-gray-100">
-              <span class="text-gray-600 font-medium">Hidden Charges</span>
-              <span class="text-lg font-bold text-blue-800">NONE</span>
-            </div>
-          </div>
-          
-          <div class="mt-8 bg-blue-600 text-white p-4 rounded-xl text-center shadow-md">
-            <p class="font-medium">Know your cost before applying</p>
-          </div>
-          
-          <div class="mt-auto">
-            <button onclick="navigate('status')" class="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
-              Proceed <i data-lucide="arrow-left" class="w-4 h-4 rotate-180"></i>
-            </button>
-            <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-4 bg-blue-500"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 7. Status Screen -->
-      <div id="screen-status" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between shadow-md z-10 relative">
-          <button onclick="navigate('dashboard')" class="p-1 hover:bg-white/20 rounded-full transition-colors">
-            <i data-lucide="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <h1 class="font-semibold text-lg">Application Status</h1>
-          <div class="w-8"></div>
-        </div>
-        
-        <div class="p-8 flex-1 flex flex-col">
-          <div class="relative pl-4 border-l-2 border-gray-200 space-y-10 py-4 mb-8">
-            <div class="relative">
-              <div class="absolute -left-[25px] top-0 bg-green-500 rounded-full p-1 border-4 border-gray-50">
-                <i data-lucide="check-circle" class="w-4 h-4 text-white"></i>
-              </div>
-              <h3 class="font-medium text-gray-800">Submitted</h3>
-            </div>
-            
-            <div class="relative">
-               <div class="absolute -left-[25px] top-0 bg-yellow-500 rounded-full p-1 border-4 border-gray-50">
-                <i data-lucide="hourglass" class="w-4 h-4 text-white"></i>
-              </div>
-              <h3 class="font-medium text-gray-800">Under Review</h3>
-            </div>
-  
-            <div class="relative">
-               <div class="absolute -left-[25px] top-0 bg-blue-500 rounded-full p-1 border-4 border-gray-50">
-                <i data-lucide="file-check" class="w-4 h-4 text-white"></i>
-              </div>
-              <h3 class="font-medium text-gray-500">Approval Pending</h3>
-            </div>
-  
-            <div class="relative">
-               <div class="absolute -left-[25px] top-0 bg-green-500 rounded-full p-1 border-4 border-gray-50">
-                <i data-lucide="check-circle" class="w-4 h-4 text-white"></i>
-              </div>
-              <h3 class="font-medium text-gray-800">Approved</h3>
-            </div>
-            
-            <div class="absolute top-0 left-[-2px] w-[2px] h-[40%] bg-blue-500"></div>
-            <div class="absolute top-[40%] left-[-2px] w-[2px] h-[30%] bg-transparent border-l-2 border-dashed border-gray-500"></div>
-          </div>
-  
-          <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-            <div class="bg-blue-600 h-2.5 rounded-full w-[70%]"></div>
-          </div>
-          <p class="text-center text-sm text-gray-500 font-medium">Real-time updates</p>
-  
-          <div class="mt-auto">
-            <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-4 bg-blue-500"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 8. Congrats Screen -->
-      <div id="screen-congrats" class="app-screen h-full w-full bg-gradient-to-b from-blue-400 via-blue-500 to-blue-700 flex-col relative overflow-hidden" style="display: none;">
-        <!-- Confetti elements -->
-        <div class="absolute top-10 left-10 text-yellow-300 opacity-80"><i data-lucide="sparkles" class="w-6 h-6"></i></div>
-        <div class="absolute top-20 right-20 text-white opacity-60"><i data-lucide="sparkles" class="w-4 h-4"></i></div>
-        <div class="absolute top-32 left-1/4 text-yellow-300 opacity-90"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
-        
-        <div class="pt-16 pb-8 px-6 text-center text-white z-10">
-          <h2 class="text-2xl font-bold mb-2">Congratulations!</h2>
-          <p class="text-lg">Your Bank Guarantee<br/>is Approved</p>
-        </div>
-        
-        <div class="flex-1 bg-white/10 backdrop-blur-sm mx-4 mb-4 mt-2 rounded-3xl p-4 grid grid-cols-2 gap-3 z-10 shadow-inner">
-          <div class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
-            <div class="bg-blue-100 p-3 rounded-full mb-3 text-blue-600">
-              <i data-lucide="file-text" class="w-7 h-7"></i>
-            </div>
-            <span class="text-sm font-semibold text-gray-700">What is BG?</span>
-          </div>
-          <div class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
-            <div class="bg-blue-100 p-3 rounded-full mb-3 text-blue-600">
-              <i data-lucide="credit-card" class="w-7 h-7"></i>
-            </div>
-            <span class="text-sm font-semibold text-gray-700">How it Works</span>
-          </div>
-          <div class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
-            <div class="bg-blue-100 p-3 rounded-full mb-3 text-blue-600">
-              <i data-lucide="shield" class="w-7 h-7"></i>
-            </div>
-            <span class="text-sm font-semibold text-gray-700">Benefits</span>
-          </div>
-          <div class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
-            <div class="bg-blue-100 p-3 rounded-full mb-3 text-blue-600">
-              <i data-lucide="message-square" class="w-7 h-7"></i>
-            </div>
-            <span class="text-sm font-semibold text-gray-700">FAQs</span>
-          </div>
-        </div>
-        <div class="text-center pb-6 text-white/90 text-sm font-medium z-10">
-          Simple explanations for everyone
-        </div>
-        
-        <button onclick="navigate('dashboard')" class="absolute bottom-2 right-2 p-4 text-transparent hover:text-white/20 transition-colors z-20">
-          <i data-lucide="arrow-left" class="w-6 h-6"></i>
+      <!-- Get Started Button (Glassmorphism) -->
+      <div class="absolute bottom-12 w-full px-8 z-10 animate-fade-in-up" style="animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards;">
+        <button onclick="navigate('login')" class="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/30 transition-all active:scale-[0.98] flex justify-center items-center h-16 gap-3">
+          Get Started <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </button>
       </div>
+    </div>
 
-      <!-- 9. Help Screen -->
-      <div id="screen-help" class="app-screen h-full w-full bg-gray-50 flex-col" style="display: none;">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between shadow-md z-10 relative">
-          <button onclick="navigate('dashboard')" class="p-1 hover:bg-white/20 rounded-full transition-colors">
-            <i data-lucide="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <h1 class="font-semibold text-lg">Need Help?</h1>
-          <div class="w-8"></div>
+    <!-- 2. Login Screen -->
+    <div id="screen-login" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 pt-20 pb-16 px-8 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 w-full h-20 bg-white/5 rounded-t-full scale-150 translate-y-10 blur-md"></div>
+        <h2 class="text-3xl font-extrabold text-white relative z-10 tracking-tight">Welcome Back</h2>
+        <p class="text-indigo-200 mt-2 relative z-10 font-medium">Sign in to continue</p>
+    </div>
+    
+    <form id="form-login" onsubmit="handleLoginSubmit(event)" class="flex-1 px-8 pt-10 pb-8 flex flex-col overflow-y-auto no-scrollbar">
+      <div class="space-y-5">
+        <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-2 pl-1">Email / Mobile</label>
+            <input type="email" required placeholder="name@example.com" class="w-full px-5 py-4 text-base bg-white border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-2 pl-1">Password</label>
+            <input type="password" required placeholder="••••••••" class="w-full px-5 py-4 text-base bg-white border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all" />
+          </div>
         </div>
         
-        <div class="p-6 flex-1 flex flex-col pt-8">
-          <div class="space-y-4">
-            <div class="bg-white p-4 rounded-xl flex items-center justify-between shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-2 rounded-full text-white">
-                  <i data-lucide="message-square" class="w-5 h-5"></i>
-                </div>
-                <span class="font-medium text-gray-800">Live Chat</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+        <button id="btn-login" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg py-4 rounded-2xl mt-10 shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-4px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] flex justify-center items-center h-16">
+          Sign In
+        </button>
+        
+        <div class="mt-auto text-center pb-4">
+          <p class="text-sm font-medium text-slate-500">
+            New to BG Simplify? <a href="#" class="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Create Account</a>
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <!-- 3. Dashboard Screen -->
+    <div id="screen-dashboard" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 pt-14 pb-20 px-6 rounded-b-[2rem] text-center relative shadow-md">
+        <!-- Floating shapes -->
+        <div class="absolute top-4 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-4 left-10 w-16 h-16 bg-indigo-900/20 rounded-full blur-lg"></div>
+        
+        <div class="absolute top-14 left-5 cursor-pointer p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors border border-white/10">
+          <i data-lucide="menu" class="text-white w-6 h-6"></i>
+        </div>
+        <div class="absolute top-14 right-5 cursor-pointer p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors border border-white/10" onclick="navigate('login')">
+          <i data-lucide="log-out" class="text-white w-5 h-5 ml-0.5"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-white mt-2 tracking-tight">Dashboard</h2>
+      </div>
+      
+      <div class="flex-1 px-6 -mt-10 flex flex-col overflow-y-auto no-scrollbar">
+        <!-- Banner -->
+        <div class="bg-white rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] p-4 mb-6 flex justify-between items-center cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-4px_rgba(0,0,0,0.15)] transition-all duration-300 group border border-slate-100 relative z-10" onclick="navigate('apply_form')">
+          <div class="flex items-center gap-3 pl-1">
+            <div class="bg-indigo-50 p-2.5 rounded-xl border border-indigo-100/50">
+              <i data-lucide="zap" class="text-indigo-600 w-5 h-5 fill-indigo-100"></i>
             </div>
-            <div class="bg-white p-4 rounded-xl flex items-center justify-between shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-2 rounded-full text-white">
-                  <i data-lucide="phone-call" class="w-5 h-5"></i>
-                </div>
-                <span class="font-medium text-gray-800">Call Support</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
-            </div>
-            <div class="bg-white p-4 rounded-xl flex items-center justify-between shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-2 rounded-full text-white">
-                  <i data-lucide="help-circle" class="w-5 h-5"></i>
-                </div>
-                <span class="font-medium text-gray-800">FAQs</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
-            </div>
+            <span class="text-slate-800 font-extrabold text-base tracking-wide">Get Guarantee in Minutes</span>
           </div>
-          
-          <div class="mt-auto">
-            <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-2 bg-gray-300"></div>
-              <div class="h-2 rounded-full transition-all duration-300 w-4 bg-blue-500"></div>
+          <div class="bg-slate-50 p-2 rounded-full border border-slate-200 group-hover:bg-indigo-50 group-hover:border-indigo-200 transition-colors">
+            <i data-lucide="arrow-right" class="text-indigo-600 w-5 h-5"></i>
+          </div>
+        </div>
+        
+        <!-- Grid -->
+        <div class="grid grid-cols-2 gap-4 pb-8">
+          <div onclick="navigate('apply_form')" class="bg-white rounded-[1.5rem] p-6 shadow-premium hover:shadow-premium-hover hover:-translate-y-1 flex flex-col items-center justify-center text-center gap-4 transition-all duration-300 cursor-pointer border border-slate-100/50">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl text-indigo-600 shadow-sm border border-white">
+              <i data-lucide="file-text" class="w-8 h-8" stroke-width="2"></i>
             </div>
+            <span class="text-sm font-bold text-slate-700 whitespace-pre-line leading-tight">Apply for<br>Guarantee</span>
+          </div>
+
+          <div onclick="navigate('status')" class="bg-white rounded-[1.5rem] p-6 shadow-premium hover:shadow-premium-hover hover:-translate-y-1 flex flex-col items-center justify-center text-center gap-4 transition-all duration-300 cursor-pointer border border-slate-100/50">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl text-indigo-600 shadow-sm border border-white">
+              <i data-lucide="clipboard-list" class="w-8 h-8" stroke-width="2"></i>
+            </div>
+            <span class="text-sm font-bold text-slate-700 whitespace-pre-line leading-tight">Track<br>Application</span>
+          </div>
+
+          <div onclick="navigate('learn')" class="bg-white rounded-[1.5rem] p-6 shadow-premium hover:shadow-premium-hover hover:-translate-y-1 flex flex-col items-center justify-center text-center gap-4 transition-all duration-300 cursor-pointer border border-slate-100/50">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl text-indigo-600 shadow-sm border border-white">
+              <i data-lucide="book-open" class="w-8 h-8" stroke-width="2"></i>
+            </div>
+            <span class="text-sm font-bold text-slate-700 whitespace-pre-line leading-tight">Learn<br>About BG</span>
+          </div>
+
+          <div onclick="navigate('help')" class="bg-white rounded-[1.5rem] p-6 shadow-premium hover:shadow-premium-hover hover:-translate-y-1 flex flex-col items-center justify-center text-center gap-4 transition-all duration-300 cursor-pointer border border-slate-100/50">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl text-indigo-600 shadow-sm border border-white">
+              <i data-lucide="headphones" class="w-8 h-8" stroke-width="2"></i>
+            </div>
+            <span class="text-sm font-bold text-slate-700 whitespace-pre-line leading-tight">Support<br>&nbsp;</span>
+          </div>
+        </div>
+        
+        <div class="mt-auto">
+          <div class="flex justify-center gap-2 py-4 mt-auto mb-2">
+            <div class="h-1.5 rounded-full transition-all duration-300 w-5 bg-indigo-500"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- 4. Apply Form Screen -->
+    <div id="screen-apply_form" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button type="button" onclick="navigate('dashboard')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Apply for Guarantee</h1>
+        <div class="w-9"></div>
+      </div>
+      
+      <form id="form-apply" onsubmit="handleApplySubmit(event)" class="p-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
+        <div class="space-y-5">
+          <!-- Premium Segmented Control -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2 pl-1">Select Type</label>
+            <div class="flex p-1.5 bg-slate-200/70 rounded-[1.25rem] relative">
+              <button type="button" id="type-perf" onclick="setBgType('Performance BG')" class="flex-1 bg-white py-3 rounded-xl shadow-sm border border-slate-100 text-sm font-bold text-indigo-700 transition-all duration-200 relative z-10">Performance</button>
+              <button type="button" id="type-fin" onclick="setBgType('Financial BG')" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-all duration-200 relative z-10">Financial</button>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2 pl-1">Enter Amount</label>
+            <div class="relative">
+              <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">₹</span>
+              <input type="number" id="input-amount" required min="1000" class="w-full pl-10 pr-5 py-4 text-base bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all" placeholder="e.g. 500000" />
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2 pl-1">Duration</label>
+            <div class="relative">
+              <select id="input-duration" required class="w-full px-5 py-4 text-base bg-white border border-slate-200 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm appearance-none transition-all font-medium">
+                <option value="" disabled selected>Select Duration</option>
+                <option value="3m">3 Months</option>
+                <option value="6m">6 Months</option>
+                <option value="1y">1 Year</option>
+                <option value="3y">3 Years</option>
+              </select>
+              <i data-lucide="chevron-down" class="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2 pl-1">Purpose</label>
+            <input type="text" id="input-purpose" required class="w-full px-5 py-4 text-base bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all" placeholder="e.g. Project Bidding" />
+          </div>
+        </div>
+        
+        <div class="mt-auto pt-8 pb-2">
+          <button id="btn-apply" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-4px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] flex justify-center items-center h-16 gap-2">
+            Continue <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 5. Upload Docs Screen -->
+    <div id="screen-upload" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button onclick="navigate('apply_form')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Upload Documents</h1>
+        <div class="w-9"></div>
+      </div>
+      
+      <div class="p-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <!-- Premium Upload Boxes -->
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="camera" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="folder" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="image" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="file-badge" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="files" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+          <div class="upload-box aspect-video rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-[0.95] border-[1.5px] border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 bg-white relative overflow-hidden group shadow-sm" onclick="toggleUpload(this)" data-uploaded="false">
+            <i data-lucide="folder-open" class="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+            <div class="check-overlay absolute inset-0 bg-indigo-500 flex items-center justify-center opacity-0 transition-opacity duration-200">
+              <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-center text-sm text-slate-500 font-semibold mb-8">Tap icons to securely select documents</p>
+        
+        <div class="mt-auto">
+          <button id="btn-upload" onclick="handleUploadSubmit()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-4px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] h-16 flex justify-center items-center">
+            Submit Documents
+          </button>
+          <div class="flex justify-center gap-2 py-4 mt-auto mb-1">
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-5 bg-indigo-500"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Pricing Screen -->
+    <div id="screen-pricing" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button onclick="navigate('upload')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Transparent Pricing</h1>
+        <div class="w-9"></div>
+      </div>
+      
+      <div class="p-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
+        <div class="space-y-4 mt-2">
+          <div class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-premium border border-slate-100">
+            <span class="text-slate-600 font-semibold text-sm">Guarantee Amount</span>
+            <span id="dynamic-total-amount" class="text-lg font-bold text-slate-800">₹0</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-premium border border-slate-100">
+            <span class="text-slate-600 font-semibold text-sm">Processing Fee</span>
+            <span class="text-xl font-bold text-slate-800">₹0</span>
+          </div>
+          
+          <!-- Highlighted Premium Card -->
+          <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl flex justify-between items-center shadow-premium border border-indigo-100 relative overflow-hidden mt-6 mb-2">
+            <div class="absolute right-0 top-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2"></div>
+            <span class="text-indigo-900 font-bold text-base relative z-10">Annual Charge <span class="text-indigo-500/70 ml-1">(1%)</span></span>
+            <span id="dynamic-annual-charge" class="text-2xl font-black text-indigo-600 relative z-10 tracking-tight">₹0</span>
+          </div>
+          
+          <div class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-premium border border-slate-100">
+            <span class="text-slate-600 font-semibold text-sm">Hidden Charges</span>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-full tracking-widest uppercase">None</span>
+          </div>
+        </div>
+        
+        <div class="mt-auto pt-6">
+          <button id="btn-proceed" onclick="handlePricingProceed()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-4px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] h-16 flex justify-center items-center gap-3">
+            Proceed to Submit <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+          <div class="flex justify-center gap-2 py-4 mt-auto mb-1">
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-5 bg-indigo-500"></div>
+            <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Status Screen -->
+    <div id="screen-status" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button onclick="navigate('dashboard')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Application Status</h1>
+      <div class="w-9"></div>
+    </div>
+    
+    <div class="p-8 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full overflow-y-auto no-scrollbar">
+      <!-- Modern Timeline -->
+      <div class="relative pl-6 border-l-[3px] border-slate-200 space-y-10 py-4 mb-10 ml-2">
+          
+          <div id="status-step-1" class="relative opacity-40 transition-all duration-500 transform translate-y-2">
+            <div class="absolute -left-[35px] top-0 bg-emerald-500 rounded-full p-1.5 ring-4 ring-[#f8fafc] shadow-sm">
+              <i data-lucide="check" class="w-4 h-4 text-white"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Submitted</h3>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Application sent successfully</p>
+          </div>
+          
+          <div id="status-step-2" class="relative opacity-40 transition-all duration-500 transform translate-y-2">
+             <div class="absolute -left-[35px] top-0 bg-amber-500 rounded-full p-1.5 ring-4 ring-[#f8fafc] shadow-sm">
+              <i data-lucide="loader-2" class="w-4 h-4 text-white animate-spin"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Under Review</h3>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Verifying your documents</p>
+          </div>
+
+          <div id="status-step-3" class="relative opacity-40 transition-all duration-500 transform translate-y-2">
+             <div class="absolute -left-[35px] top-0 bg-indigo-500 rounded-full p-1.5 ring-4 ring-[#f8fafc] shadow-sm">
+              <i data-lucide="file-search" class="w-4 h-4 text-white"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Approval Pending</h3>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Finalizing bank terms</p>
+          </div>
+
+          <div id="status-step-4" class="relative opacity-40 transition-all duration-500 transform translate-y-2">
+             <div class="absolute -left-[35px] top-0 bg-emerald-500 rounded-full p-1.5 ring-4 ring-[#f8fafc] shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-white"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Approved</h3>
+            <p class="text-sm text-emerald-600 font-semibold mt-1">Ready for issuance</p>
+          </div>
+        </div>
+
+        <div class="w-full bg-slate-200 rounded-full h-2 mb-4 overflow-hidden shadow-inner">
+          <div id="status-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full w-[0%] transition-all duration-1000 ease-out relative">
+            <div class="absolute top-0 right-0 bottom-0 left-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[shimmer_1s_linear_infinite]"></div>
+          </div>
+        </div>
+        <p class="text-center text-sm text-slate-500 font-bold animate-pulse tracking-wide">LIVE UPDATES</p>
+
+        <div class="mt-auto">
+          <div class="flex justify-center gap-2 py-4 mt-auto mb-1">
+          <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+          <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+          <div class="h-1.5 rounded-full transition-all duration-300 w-1.5 bg-slate-300"></div>
+          <div class="h-1.5 rounded-full transition-all duration-300 w-5 bg-indigo-500"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Navigation Helper (for prototype demonstration) -->
-  <div class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-xl text-sm hidden md:block z-50">
-    <h3 class="font-bold mb-2">Dev Tools (Jump to)</h3>
-    <div class="grid grid-cols-2 gap-2">
-      <button onclick="navigate('splash')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">splash</button>
-      <button onclick="navigate('login')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">login</button>
-      <button onclick="navigate('dashboard')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">dashboard</button>
-      <button onclick="navigate('apply_form')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">apply_form</button>
-      <button onclick="navigate('upload')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">upload</button>
-      <button onclick="navigate('pricing')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">pricing</button>
-      <button onclick="navigate('status')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">status</button>
-      <button onclick="navigate('congrats')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">congrats</button>
-      <button onclick="navigate('help')" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-left text-xs">help</button>
+    <!-- 8. Congrats Screen -->
+    <div id="screen-congrats" class="app-screen h-full w-full bg-gradient-to-br from-indigo-700 via-blue-600 to-indigo-900 flex-col relative overflow-hidden z-50" style="display: none;">
+      <!-- Glowing Effects -->
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none z-0"></div>
+      
+      <!-- Confetti elements -->
+      <div class="absolute top-10 left-10 text-yellow-300 opacity-80 animate-pulse z-0"><i data-lucide="sparkles" class="w-8 h-8"></i></div>
+      <div class="absolute top-24 right-12 text-white opacity-90 animate-bounce z-0" style="animation-duration: 3s;"><i data-lucide="sparkles" class="w-6 h-6"></i></div>
+      <div class="absolute top-40 left-1/4 text-yellow-300 opacity-90 animate-bounce z-0" style="animation-duration: 2.5s;"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+      
+      <!-- Scrollable Wrapper -->
+      <div class="w-full h-full overflow-y-auto no-scrollbar flex flex-col relative z-10">
+        <div class="pt-20 pb-8 px-6 text-center text-white animate-fade-in-up shrink-0">
+          <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(255,255,255,0.3)] border border-white/40">
+            <i data-lucide="check" class="w-10 h-10 text-white drop-shadow-md"></i>
+          </div>
+          <h2 class="text-3xl font-extrabold mb-3 tracking-tight">Congratulations!</h2>
+          <p class="text-lg text-indigo-100 leading-snug font-medium">Your Bank Guarantee<br/>has been Approved</p>
+        </div>
+        
+        <div class="flex-1 mx-5 mb-8 mt-2 grid grid-cols-2 gap-4 shrink-0">
+          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[1.5rem] p-4 flex flex-col items-center justify-center text-center shadow-glass cursor-pointer hover:bg-white/20 transition-all active:scale-[0.96]">
+            <div class="bg-white/20 p-3 rounded-full mb-3 text-white">
+              <i data-lucide="file-text" class="w-6 h-6"></i>
+            </div>
+            <span class="text-sm font-bold text-white tracking-wide">View BG</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[1.5rem] p-4 flex flex-col items-center justify-center text-center shadow-glass cursor-pointer hover:bg-white/20 transition-all active:scale-[0.96]">
+            <div class="bg-white/20 p-3 rounded-full mb-3 text-white">
+              <i data-lucide="credit-card" class="w-6 h-6"></i>
+            </div>
+            <span class="text-sm font-bold text-white tracking-wide">Pay Fees</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[1.5rem] p-4 flex flex-col items-center justify-center text-center shadow-glass cursor-pointer hover:bg-white/20 transition-all active:scale-[0.96]">
+            <div class="bg-white/20 p-3 rounded-full mb-3 text-white">
+              <i data-lucide="shield" class="w-6 h-6"></i>
+            </div>
+            <span class="text-sm font-bold text-white tracking-wide">Benefits</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[1.5rem] p-4 flex flex-col items-center justify-center text-center shadow-glass cursor-pointer hover:bg-white/20 transition-all active:scale-[0.96]">
+            <div class="bg-white/20 p-3 rounded-full mb-3 text-white">
+              <i data-lucide="download" class="w-6 h-6"></i>
+            </div>
+            <span class="text-sm font-bold text-white tracking-wide">Download</span>
+          </div>
+        </div>
+        
+        <div class="text-center pb-8 mt-auto w-full px-6 shrink-0">
+          <button onclick="navigate('dashboard')" class="w-full bg-white text-indigo-700 font-extrabold text-lg py-4 rounded-2xl shadow-[0_8px_30px_rgba(255,255,255,0.2)] hover:bg-indigo-50 hover:-translate-y-0.5 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+            Go to Dashboard <i data-lucide="home" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
     </div>
+
+    <!-- 9. Help Screen -->
+    <div id="screen-help" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button onclick="navigate('dashboard')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Need Help?</h1>
+        <div class="w-9"></div>
+      </div>
+      
+      <div class="p-6 flex-1 flex flex-col pt-8 overflow-y-auto no-scrollbar">
+        <div class="space-y-4">
+          <div class="bg-white p-5 rounded-[1.25rem] flex items-center justify-between shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="flex items-center gap-4">
+              <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600">
+                <i data-lucide="message-square" class="w-6 h-6"></i>
+              </div>
+              <span class="font-bold text-base text-slate-800">Live Chat</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+          </div>
+          <div class="bg-white p-5 rounded-[1.25rem] flex items-center justify-between shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="flex items-center gap-4">
+              <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600">
+                <i data-lucide="phone-call" class="w-6 h-6"></i>
+              </div>
+              <span class="font-bold text-base text-slate-800">Call Support</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+          </div>
+          <div class="bg-white p-5 rounded-[1.25rem] flex items-center justify-between shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="flex items-center gap-4">
+              <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600">
+                <i data-lucide="help-circle" class="w-6 h-6"></i>
+              </div>
+              <span class="font-bold text-base text-slate-800">FAQs</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-6">
+          <button onclick="navigate('dashboard')" class="w-full bg-slate-100 text-slate-600 border border-slate-200 font-bold text-base py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-[0.98] h-16 flex justify-center items-center gap-2">
+            Go to Dashboard <i data-lucide="home" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Learn About BG Screen -->
+    <div id="screen-learn" class="app-screen h-full w-full bg-[#f8fafc] flex-col" style="display: none;">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 flex items-center justify-between shadow-md z-10 shrink-0">
+        <button onclick="navigate('dashboard')" class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 rounded-full transition-colors">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-bold text-lg tracking-tight">Learn About BG</h1>
+        <div class="w-9"></div>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col overflow-y-auto no-scrollbar pt-8">
+        <!-- Premium Search -->
+        <div class="relative mb-8 group shrink-0">
+          <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+          <input type="text" placeholder="Search topics..." class="w-full bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-full py-3.5 pl-12 pr-5 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition-all text-base font-medium" />
+        </div>
+
+        <!-- List Items -->
+        <div class="space-y-4">
+          <!-- Item 1 -->
+          <div class="bg-white p-4 rounded-[1.25rem] flex items-center gap-4 shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="bg-indigo-50 p-3 rounded-xl shrink-0 border border-indigo-100/50">
+              <i data-lucide="book-open" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div class="flex-1 pr-1">
+              <h3 class="font-bold text-base text-slate-800 mb-0.5 tracking-tight">Introduction to BG</h3>
+              <p class="text-slate-500 text-xs font-medium leading-snug">Learn what a Bank Guarantee is and how it works</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 shrink-0"></i>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="bg-white p-4 rounded-[1.25rem] flex items-center gap-4 shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="bg-indigo-50 p-3 rounded-xl shrink-0 border border-indigo-100/50">
+              <i data-lucide="layers" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div class="flex-1 pr-1">
+              <h3 class="font-bold text-base text-slate-800 mb-0.5 tracking-tight">Types of Guarantees</h3>
+              <p class="text-slate-500 text-xs font-medium leading-snug">Understand different types of Guarantees</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 shrink-0"></i>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="bg-white p-4 rounded-[1.25rem] flex items-center gap-4 shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="bg-indigo-50 p-3 rounded-xl shrink-0 border border-indigo-100/50">
+              <i data-lucide="clipboard-check" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div class="flex-1 pr-1">
+              <h3 class="font-bold text-base text-slate-800 mb-0.5 tracking-tight">Step-by-Step Process</h3>
+              <p class="text-slate-500 text-xs font-medium leading-snug">Follow the detailed steps to apply</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 shrink-0"></i>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="bg-white p-4 rounded-[1.25rem] flex items-center gap-4 shadow-premium border border-slate-100 cursor-pointer hover:-translate-y-0.5 hover:shadow-premium-hover transition-all active:scale-[0.98]">
+            <div class="bg-indigo-50 p-3 rounded-xl shrink-0 border border-indigo-100/50">
+              <i data-lucide="shield-check" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div class="flex-1 pr-1">
+              <h3 class="font-bold text-base text-slate-800 mb-0.5 tracking-tight">Eligibility Criteria</h3>
+              <p class="text-slate-500 text-xs font-medium leading-snug">Know the criteria and documents needed</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 shrink-0"></i>
+          </div>
+
+        </div>
+
+        <div class="mt-auto pt-6">
+          <button onclick="navigate('dashboard')" class="w-full bg-slate-100 text-slate-600 border border-slate-200 font-bold text-base py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-[0.98] h-16 flex justify-center items-center gap-2">
+            Go to Dashboard <i data-lucide="home" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Application Logic -->
+  <!-- Application State & Logic -->
+  <style>
+    /* Custom Shimmer animation for loading bar */
+    @keyframes shimmer {
+      0% { background-position: 2rem 0; }
+      100% { background-position: 0 0; }
+    }
+  </style>
   <script>
     // Initialize Lucide Icons
     lucide.createIcons();
 
+    // App State Management
+    const appState = {
+      bgType: 'Performance BG',
+      amount: 0,
+      duration: '',
+      purpose: '',
+      docsUploaded: 0
+    };
+
+    // Navigation and Timers
     let currentScreen = 'splash';
-    let splashTimer, statusTimer;
+    let simulationTimers = [];
 
     function navigate(screenName) {
+      // Clear any running simulation timers
+      simulationTimers.forEach(t => clearTimeout(t));
+      simulationTimers = [];
+
       // Hide all screens
-      const screens = document.querySelectorAll('.app-screen');
-      screens.forEach(screen => {
+      document.querySelectorAll('.app-screen').forEach(screen => {
         screen.style.display = 'none';
       });
 
@@ -506,19 +675,168 @@
 
       currentScreen = screenName;
 
-      // Clear any existing timers to prevent unintended jumps
-      clearTimeout(splashTimer);
-      clearTimeout(statusTimer);
-
-      // Handle specific screen timers
-      if (screenName === 'splash') {
-        splashTimer = setTimeout(() => { navigate('login'); }, 2000);
-      } else if (screenName === 'status') {
-        statusTimer = setTimeout(() => { navigate('congrats'); }, 3000);
+      // Special handling per screen
+      if (screenName === 'status') {
+        runStatusSimulation();
       }
     }
 
-    // Start app
+    // UI Helpers
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.remove('opacity-0', '-translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      simulationTimers.push(setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000));
+    }
+
+    function setBtnLoading(btnId, isLoading, originalHTML) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto"></i>`;
+        lucide.createIcons();
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        lucide.createIcons();
+      }
+    }
+
+    function simulateNetwork(btnId, originalHTML, callback) {
+      setBtnLoading(btnId, true);
+      simulationTimers.push(setTimeout(() => {
+        setBtnLoading(btnId, false, originalHTML);
+        callback();
+      }, 1200 + Math.random() * 800)); // 1.2 to 2 sec delay
+    }
+
+    // Currency Formatter
+    const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { 
+      style: 'currency', 
+      currency: 'INR', 
+      maximumFractionDigits: 0 
+    }).format(val);
+
+    // --- Screen Specific Logic ---
+
+    // Login
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      simulateNetwork('btn-login', 'Sign In', () => navigate('dashboard'));
+    }
+
+    // Apply Form: Select Type
+    function setBgType(type) {
+      appState.bgType = type;
+      const isPerf = type === 'Performance BG';
+      
+      const btnPerf = document.getElementById('type-perf');
+      const btnFin = document.getElementById('type-fin');
+      
+      btnPerf.className = isPerf 
+        ? 'flex-1 bg-white py-3 rounded-xl shadow-sm border border-slate-100 text-sm font-bold text-indigo-700 transition-all duration-200 relative z-10' 
+        : 'flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-all duration-200 relative z-10';
+      btnFin.className = !isPerf 
+        ? 'flex-1 bg-white py-3 rounded-xl shadow-sm border border-slate-100 text-sm font-bold text-indigo-700 transition-all duration-200 relative z-10' 
+        : 'flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-all duration-200 relative z-10';
+    }
+
+    // Apply Form: Submit
+    function handleApplySubmit(e) {
+      e.preventDefault();
+      const amountVal = parseFloat(document.getElementById('input-amount').value);
+      
+      if (amountVal < 1000) {
+        showToast("Minimum Guarantee amount is ₹1,000");
+        return;
+      }
+      
+      appState.amount = amountVal;
+      appState.duration = document.getElementById('input-duration').value;
+      appState.purpose = document.getElementById('input-purpose').value;
+      
+      const nextHtml = `Continue <i data-lucide="arrow-right" class="w-5 h-5"></i>`;
+      simulateNetwork('btn-apply', nextHtml, () => navigate('upload'));
+    }
+
+    // Upload Docs: Toggle selection
+    function toggleUpload(elem) {
+      const overlay = elem.querySelector('.check-overlay');
+      const isUploaded = elem.getAttribute('data-uploaded') === 'true';
+      
+      if (isUploaded) {
+        elem.setAttribute('data-uploaded', 'false');
+        elem.classList.remove('border-indigo-500');
+        elem.classList.add('border-slate-300');
+        overlay.classList.add('opacity-0');
+        appState.docsUploaded--;
+      } else {
+        elem.setAttribute('data-uploaded', 'true');
+        elem.classList.add('border-indigo-500');
+        elem.classList.remove('border-slate-300');
+        overlay.classList.remove('opacity-0');
+        appState.docsUploaded++;
+      }
+    }
+
+    // Upload Docs: Submit
+    function handleUploadSubmit() {
+      if (appState.docsUploaded === 0) {
+        showToast("Please select at least one document to upload");
+        return;
+      }
+      
+      simulateNetwork('btn-upload', 'Submit Documents', () => {
+        // Pre-fill pricing before showing
+        const fee = appState.amount * 0.01;
+        document.getElementById('dynamic-total-amount').innerText = formatCurrency(appState.amount);
+        document.getElementById('dynamic-annual-charge').innerText = formatCurrency(fee);
+        navigate('pricing');
+      });
+    }
+
+    // Pricing: Proceed
+    function handlePricingProceed() {
+      const html = `Proceed to Submit <i data-lucide="arrow-right" class="w-5 h-5"></i>`;
+      simulateNetwork('btn-proceed', html, () => navigate('status'));
+    }
+
+    // Status: Automation Sequence
+    function runStatusSimulation() {
+      const pbar = document.getElementById('status-progress-bar');
+      pbar.style.width = '0%';
+      
+      // Reset steps UI
+      for(let i=1; i<=4; i++) {
+        const step = document.getElementById(`status-step-${i}`);
+        step.classList.add('opacity-40', 'translate-y-2');
+        step.classList.remove('opacity-100', 'translate-y-0');
+      }
+
+      // Timing definition
+      const delays = [800, 2000, 3200, 4500];
+      const widths = ['25%', '50%', '75%', '100%'];
+      
+      delays.forEach((delay, idx) => {
+        simulationTimers.push(setTimeout(() => {
+          const step = document.getElementById(`status-step-${idx+1}`);
+          step.classList.remove('opacity-40', 'translate-y-2');
+          step.classList.add('opacity-100', 'translate-y-0');
+          pbar.style.width = widths[idx];
+        }, delay));
+      });
+
+      // Finish and move to Congrats
+      simulationTimers.push(setTimeout(() => navigate('congrats'), 5800));
+    }
+
+    // Initialize App
     navigate('splash');
   </script>
 </body>
